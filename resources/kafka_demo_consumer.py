@@ -2,6 +2,10 @@ import os
 from kafka import KafkaConsumer
 from tabulate import tabulate
 
+# Load environment variables.
+from dotenv import load_dotenv
+load_dotenv()
+
 # Kafka broker details
 bootstrap_servers = os.environ.get("HWE_BOOTSTRAP")
 username = os.environ.get("HWE_USERNAME")
@@ -12,7 +16,7 @@ topic = 'demo-topic-1'
 
 # Create Kafka consumer
 consumer = KafkaConsumer(topic,
-                         group_id='demo-group',
+                         group_id='michael-group',
                          security_protocol="SASL_SSL",
                          sasl_mechanism="SCRAM-SHA-512", 
                          sasl_plain_username=username, 

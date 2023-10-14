@@ -3,8 +3,9 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import desc, col, lit
 from pyspark.sql.functions import current_timestamp
 
-from datetime import datetime
-
+# Load environment variables.
+from dotenv import load_dotenv
+load_dotenv()
 
 aws_access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
 aws_secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
