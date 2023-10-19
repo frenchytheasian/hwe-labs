@@ -47,37 +47,35 @@ logger.LogManager.getLogger("org.apache.spark.SparkEnv").setLevel(logger.Level.E
 
 bronze_schema = StructType(
     [
-        StructField("marketplace", StringType, nullable=True),
-        StructField("customer_id", StringType, nullable=True),
-        StructField("review_id", StringType, nullable=True),
-        StructField("product_id", StringType, nullable=True),
-        StructField("product_parent", StringType, nullable=True),
-        StructField("product_title", StringType, nullable=True),
-        StructField("product_category", StringType, nullable=True),
-        StructField("star_rating", IntegerType, nullable=True),
-        StructField("helpful_votes", IntegerType, nullable=True),
-        StructField("total_votes", IntegerType, nullable=True),
-        StructField("vine", StringType, nullable=True),
-        StructField("verified_purchase", StringType, nullable=True),
-        StructField("review_headline", StringType, nullable=True),
-        StructField("review_body", StringType, nullable=True),
-        StructField("purchase_date", TimestampType, nullable=True),
-        StructField("review_timestamp", TimestampType, nullable=True),
+        StructField("marketplace", StringType(), nullable=True),
+        StructField("customer_id", StringType(), nullable=True),
+        StructField("review_id", StringType(), nullable=True),
+        StructField("product_id", StringType(), nullable=True),
+        StructField("product_parent", StringType(), nullable=True),
+        StructField("product_title", StringType(), nullable=True),
+        StructField("product_category", StringType(), nullable=True),
+        StructField("star_rating", IntegerType(), nullable=True),
+        StructField("helpful_votes", IntegerType(), nullable=True),
+        StructField("total_votes", IntegerType(), nullable=True),
+        StructField("vine", StringType(), nullable=True),
+        StructField("verified_purchase", StringType(), nullable=True),
+        StructField("review_headline", StringType(), nullable=True),
+        StructField("review_body", StringType(), nullable=True),
+        StructField("purchase_date", StringType(), nullable=True),
+        StructField("review_timestamp", TimestampType(), nullable=True),
     ]
 )
 
 bronze_reviews = spark.readStream.schema(bronze_schema).parquet(
-    "s3://hwe-fall-2023/mfrench/bronze/reviews"
+    "s3a://hwe-fall-2023/mfrench/bronze/reviews"
 )
 
 bronze_reviews.createOrReplaceTempView("bronze_reviews")
 
-bronze_customers = spark.read.parquet("s3://hwe-fall-2023/mfrench/bronze/customers")
+bronze_customers = spark.read.parquet("s3a://hwe-fall-2023/mfrench/bronze/customers")
 bronze_customers.createOrReplaceTempView("bronze_customers")
 
-silver_data = spark.sql(
-    "SELECT * FROM bronze_reviews JOIN bronze_customers ON bronze_reviews.customer_id = bronze_customers.customer_id"
-)
+silver_data = spark.sql("""SELECT bronze_reviews.*, bc.customer_name, bc.gender, bc.date_of_birth, bc.city, bc.state FROM bronze_reviews JOIN bronze_customers bc ON bronze_reviews.customer_id = bc.customer_id WHERE bronze_reviews.verified_purchase = 'Y'""")
 
 streaming_query = (
     silver_data.writeStream.outputMode("append")
@@ -87,7 +85,7 @@ streaming_query = (
     .start()
 )
 
-streaming_query.start().awaitTermination()
+streaming_query.awaitTermination()
 
 ## Stop the SparkSession
 spark.stop()
