@@ -75,7 +75,9 @@ bronze_reviews.createOrReplaceTempView("bronze_reviews")
 bronze_customers = spark.read.parquet("s3a://hwe-fall-2023/mfrench/bronze/customers")
 bronze_customers.createOrReplaceTempView("bronze_customers")
 
-silver_data = spark.sql("""SELECT bronze_reviews.*, bc.customer_name, bc.gender, bc.date_of_birth, bc.city, bc.state FROM bronze_reviews JOIN bronze_customers bc ON bronze_reviews.customer_id = bc.customer_id WHERE bronze_reviews.verified_purchase = 'Y'""")
+silver_data = spark.sql(
+    """SELECT bronze_reviews.*, bc.customer_name, bc.gender, bc.date_of_birth, bc.city, bc.state FROM bronze_reviews JOIN bronze_customers bc ON bronze_reviews.customer_id = bc.customer_id WHERE bronze_reviews.verified_purchase = 'Y'"""
+)
 
 streaming_query = (
     silver_data.writeStream.outputMode("append")
