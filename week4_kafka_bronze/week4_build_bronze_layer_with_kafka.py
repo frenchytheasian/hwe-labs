@@ -73,9 +73,9 @@ cols = [
     "product_parent",
     "product_title",
     "product_category",
-    "star_rating",
-    "helpful_votes",
-    "total_votes",
+    ("star_rating", "int"),
+    ("helpful_votes", "int"),
+    ("total_votes", "int"),
     "vine",
     "verified_purchase",
     "review_headline",
@@ -83,7 +83,10 @@ cols = [
     "purchase_date",
 ]
 for i, column in enumerate(cols):
-    df = df.withColumn(column, split(col('value'), "\t")[i])
+    if isinstance(column, tuple):
+        df = df.withColumn(column[0], split(col('value'), "\t")[i].cast(column[1]))
+    else:
+        df = df.withColumn(column, split(col('value'), "\t")[i])
 
 df = df.withColumn("review_timestamp", current_timestamp())
 df = df.drop("value")
@@ -91,7 +94,7 @@ df = df.drop("value")
 # Process the received data
 query = (
     df.writeStream.outputMode("append").format("parquet")
-    .option("path", "s3://hwe-fall-2023/mfrench/bronze/reviews")
+    .option("path", "s3a://hwe-fall-2023/mfrench/bronze/reviews")
     .option("checkpointLocation", "/tmp/kafka-checkpoint")
     .start()
 )

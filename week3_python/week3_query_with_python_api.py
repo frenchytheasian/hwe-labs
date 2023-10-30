@@ -2,6 +2,7 @@ import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import desc, col, lit
 from pyspark.sql.functions import current_timestamp
+from datetime import datetime
 
 # Load environment variables.
 from dotenv import load_dotenv
@@ -109,6 +110,7 @@ reviews_with_timestamp.write.mode('overwrite').parquet('s3a://hwe-fall-2023/mfre
 # Make sure to write it using overwrite mode: append will keep appending duplicates, which will cause problems in later labs...
 # There are no questions to answer about this data set right now, but you will use it in a later lab...
 customers = spark.read.csv('resources/customers.tsv.gz', sep='\t', header=True)
+customers.printSchema()
 customers.write.mode('overwrite').parquet('s3a://hwe-fall-2023/mfrench/bronze/customers')
 
 # Stop the SparkSession
